@@ -1,0 +1,48 @@
+{
+  "name": "ifs-parts-electron",
+  "version": "1.0.0",
+  "description": "IFS Parts Application - Electron Desktop App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --enable-logging",
+    "build": "electron-builder",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "electron",
+    "ifs",
+    "parts"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "IFS Parts by Existenz",
+    "productName": "IFS Parts",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "package.json",
+      "src/",
+      "data/",
+      "images/"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "src/Icons"
+    }
+  }
+}
