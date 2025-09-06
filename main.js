@@ -44,12 +44,13 @@ app.on('activate', () => {
 // ==========================
 // CODE FOR FILE EXPORT
 // ==========================
-ipcMain.on('save-html-dialog', (event, htmlContent) => {
+ipcMain.on('save-html-dialog', (event, data) => {
+  const { htmlContent, defaultPath } = data;
   const window = BrowserWindow.fromWebContents(event.sender);
 
   dialog.showSaveDialog(window, {
     title: 'Save Card Review Results',
-    defaultPath: 'card_review_results.html',
+    defaultPath: defaultPath,
       filters: [
         { name: 'HTML Files', extensions: ['html'] },
         { name: 'All Files', extensions: ['*'] }

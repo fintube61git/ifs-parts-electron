@@ -403,10 +403,45 @@ document.addEventListener('DOMContentLoaded', () => {
             <style>
             body { background-color: var(--bg-secondary); padding: 1rem; }
             .report-header { text-align: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid var(--border-color); }
-            .report-card { display: flex; flex-wrap: wrap; gap: 1.5rem; padding: 1.5rem; margin: 0 auto 2rem auto; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--bg-primary); box-shadow: 0 4px 12px var(--shadow-light); max-width: 1400px; page-break-inside: avoid; }
+            .report-card { display: flex; gap: 1.5rem; padding: 1.5rem; margin: 0 auto 2rem auto; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--bg-primary); box-shadow: 0 4px 12px var(--shadow-light); max-width: 1400px; page-break-inside: avoid; }
             .report-card-image { flex: 1 1 40%; min-width: 300px; }
             .report-card-image img { max-width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--border-color); }
             .report-card-responses { flex: 1 1 55%; min-width: 300px; }
+            .report-card-responses textarea, .report-card-responses input[type="radio"], .report-card-responses input[type="checkbox"] {
+                display: block;
+                width: 100%;
+                padding: 0.5rem;
+                font-size: 1rem;
+                box-sizing: border-box;
+                margin-bottom: 0.5rem;
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                background-color: var(--bg-primary);
+                color: var(--text-color);
+            }
+            .report-card-responses .optionGroup {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            .report-card-responses .optionGroup label {
+                flex: 1 1 auto;
+                display: block;
+                padding: 0.5rem 1rem;
+                text-align: center;
+                border: 1px solid var(--border-color);
+                border-radius: 20px;
+                cursor: pointer;
+                transition: background-color 0.2s ease, border-color 0.2s ease;
+            }
+            .report-card-responses .optionGroup input {
+                display: none;
+            }
+            .report-card-responses .optionGroup label.selected {
+                background-color: #555c8f;
+                border-color: #555c8f;
+                color: white;
+            }
             h2.filename { margin-top: 0; margin-bottom: 1rem; color: var(--accent-purple); font-size: 1.5rem; word-break: break-all; }
             @media print { .report-card-image, .report-card-responses { flex-basis: 50%; } }
             </style>
@@ -466,8 +501,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 htmlContent += `</div></div>`;
             }
             htmlContent += `</body></html>`;
-            ipcRenderer.send('save-html-dialog', htmlContent);
 
+            const now = new Date();
+            const date = now.toISOString().slice(0, 10);
+            const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            const defaultPath = `CardReview_${date}_${time}.html`;
+            ipcRenderer.send('save-html-dialog', { htmlContent, defaultPath });
         } catch (error) {
             console.error("Failed to generate HTML content:", error);
             alert("An error occurred during HTML generation. Please check the console for details.");
