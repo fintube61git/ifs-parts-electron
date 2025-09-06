@@ -6,11 +6,7 @@
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make",
-    "dev": "electron . --enable-logging",
-    "build": "electron-builder",
-    "dist": "electron-builder",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "make": "electron-forge make"
   },
   "keywords": [
     "electron",
