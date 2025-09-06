@@ -4,12 +4,10 @@
   "description": "IFS Parts Application - Electron Desktop App",
   "main": "main.js",
   "scripts": {
-  "start": "electron .",
-  "dev": "electron . --enable-logging",
-  "build": "electron-builder",
-  "dist": "electron-builder",
-  "test": "echo \"Error: no test specified\" && exit 1"
-},
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
   "keywords": [
     "electron",
     "ifs",
