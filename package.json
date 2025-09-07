@@ -13,7 +13,7 @@
     "ifs",
     "parts"
   ],
-  "author": "",
+  "author": "Existenz",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {},
@@ -33,7 +33,10 @@
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
-          "config": {}
+          "config": {
+            "authors": "Existenz",
+            "description": "IFS Parts Application - Electron Desktop App"
+          }
         },
         {
           "name": "@electron-forge/maker-dmg",
