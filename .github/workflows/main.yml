@@ -1,36 +1,51 @@
-name: Release
+# A descriptive name for your workflow
+name: Build Electron App
 
+# This section defines when the workflow will run
 on:
+  # Run on pushes to the 'main' branch
   push:
-    tags:
-      - 'v*.*.*'
+    branches: [ "main" ]
+  # Also run on pull requests targeting the 'main' branch
+  pull_request:
+    branches: [ "main" ]
+  # Allows you to manually trigger this workflow from the Actions tab
+  workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
-
+# This section defines the jobs to be executed
 jobs:
-  build-and-release:
-    name: Build and Release
+  build:
+    # This strategy creates a 'matrix' to run the job on multiple operating systems
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
-    
+        os: [macos-latest, windows-latest, ubuntu-latest]
+
+    # The type of virtual machine to run the job on, based on the matrix
     runs-on: ${{ matrix.os }}
 
+    # The sequence of steps to perform for the job
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    # 1. Checks out your repository's code so the job can access it
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+    # 2. Sets up the correct version of Node.js
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
+    # 3. Installs all project dependencies
+    - name: Install Dependencies
+      run: npm install
 
-      - name: Package and Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        run: npm run make
+    # 4. Runs the 'make' script from your package.json to build the app
+    - name: Build Application
+      run: npm run make
+
+    # 5. (Optional but recommended) Uploads the finished app as an artifact
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.os }}-build
+        path: out/make
