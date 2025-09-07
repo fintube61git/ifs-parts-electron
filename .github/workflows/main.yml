@@ -1,5 +1,4 @@
 # A descriptive name for your workflow
-# Forcing a new save on Sept 7, 2025
 name: Build Electron App
 
 # This section defines when the workflow will run
@@ -33,7 +32,6 @@ jobs:
     # ADDED THIS STEP TO INCREASE MEMORY ON LINUX RUNNERS
     - name: Set up swap space
       if: runner.os == 'Linux'
-      # Corrected the typo in the 'uses' line below
       uses: pierotofy/set-swap-space-action@v2
       with:
         swap-size-gb: 10
