@@ -16,12 +16,14 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up swap space
+      - name: Manually set up swap space on Linux
         if: runner.os == 'Linux'
-        uses: pierotofy/set-swap-space-action@v2
-        with:
-          swap-size-gb: 10
-
+        run: |
+          sudo fallocate -l 10G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
