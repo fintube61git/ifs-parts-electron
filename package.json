@@ -16,34 +16,43 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs",
+  "dependencies": {},
   "devDependencies": {
-    "electron": "^28.2.2",
-    "electron-builder": "^24.9.1",
-    "@electron-forge/cli": "^6.4.2"
+    "@electron-forge/cli": "^6.4.2",
+    "@electron-forge/maker-deb": "^7.4.0",
+    "@electron-forge/maker-dmg": "^7.4.0",
+    "@electron-forge/maker-rpm": "^7.4.0",
+    "@electron-forge/maker-squirrel": "^7.4.0",
+    "electron": "^28.2.2"
   },
-  "build": {
-    "appId": "IFS Parts by Existenz",
-    "productName": "IFS Parts",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "main.js",
-      "package.json",
-      "src/",
-      "data/",
-      "images/"
-    ],
-    "win": {
-      "target": "nsis"
-    },
-    "mac": {
-      "target": "dmg"
-    },
-    "linux": {
-      "target": "AppImage",
-      "icon": "src/Icons"
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "icon": "src/Icons/icon"
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-dmg",
+          "platforms": [
+            "darwin"
+          ],
+          "config": {
+            "name": "IFS Parts"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
     }
-  },
-  "dependencies": {}
+  }
 }
