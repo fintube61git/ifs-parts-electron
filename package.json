@@ -17,8 +17,9 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "electron": "^38.0.0",
-    "electron-builder": "^26.0.12"
+    "electron": "^28.2.2",
+    "electron-builder": "^24.9.1",
+    "@electron-forge/cli": "^6.4.2"
   },
   "build": {
     "appId": "IFS Parts by Existenz",
@@ -43,7 +44,6 @@
       "target": "AppImage",
       "icon": "src/Icons"
     }
-  }
+  },
+  "dependencies": {}
 }
-
-
