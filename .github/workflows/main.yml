@@ -32,6 +32,7 @@ jobs:
     # ADDED THIS STEP TO INCREASE MEMORY ON LINUX RUNNERS
     - name: Set up swap space
       if: runner.os == 'Linux'
+      # Corrected the typo in the 'uses' line below
       uses: pierotofy/set-swap-space-action@v2
       with:
         swap-size-gb: 10
