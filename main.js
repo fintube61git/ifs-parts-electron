@@ -48,9 +48,12 @@ ipcMain.on('save-html-dialog', (event, data) => {
   const { htmlContent, defaultPath } = data;
   const window = BrowserWindow.fromWebContents(event.sender);
 
+  // ✅ FIX: Sanitize the suggested filename to make it Windows-compatible
+  const sanitizedDefaultPath = defaultPath.replace(/:/g, '-');
+
   dialog.showSaveDialog(window, {
     title: 'Save Card Review Results',
-    defaultPath: defaultPath,
+    defaultPath: sanitizedDefaultPath, // Use the sanitized path here
       filters: [
         { name: 'HTML Files', extensions: ['html'] },
         { name: 'All Files', extensions: ['*'] }
