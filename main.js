@@ -1,5 +1,4 @@
 // main.js
-
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -48,16 +47,17 @@ ipcMain.on('save-html-dialog', async (event, data) => {
   const window = BrowserWindow.fromWebContents(event.sender);
   try {
     const { htmlContent, defaultPath } = data;
+
     // Replace colons in the default path to prevent issues on Windows.
     const safeDefaultPath = defaultPath.replace(/:/g, '-');
 
     const saveResult = await dialog.showSaveDialog(window, {
       title: 'Save Card Review Results',
       defaultPath: safeDefaultPath,
-      filters: [
-        { name: 'HTML Files', extensions: ['html'] },
-        { name: 'All Files', extensions: ['*'] }
-      ]
+        filters: [
+          { name: 'HTML Files', extensions: ['html'] },
+          { name: 'All Files', extensions: ['*'] }
+        ]
     });
 
     if (saveResult.canceled || !saveResult.filePath) {
@@ -79,7 +79,11 @@ ipcMain.on('save-html-dialog', async (event, data) => {
       shell.openPath(saveResult.filePath);
     }
 
-    event.sender.send('save-html-result', { success: true, path: saveResult.filePath, opened: messageBoxResult.response === 0 });
+    event.sender.send('save-html-result', {
+      success: true,
+      path: saveResult.filePath,
+      opened: messageBoxResult.response === 0
+    });
   } catch (err) {
     event.sender.send('save-html-result', { success: false, error: err.message });
   }
