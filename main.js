@@ -1,6 +1,6 @@
 // main.js
 
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -44,30 +44,43 @@ app.on('activate', () => {
 // ==========================
 // CODE FOR FILE EXPORT
 // ==========================
-ipcMain.on('save-html-dialog', (event, data) => {
-  const { htmlContent, defaultPath } = data;
+ipcMain.on('save-html-dialog', async (event, data) => {
   const window = BrowserWindow.fromWebContents(event.sender);
+  try {
+    const { htmlContent, defaultPath } = data;
+    // Replace colons in the default path to prevent issues on Windows.
+    const safeDefaultPath = defaultPath.replace(/:/g, '-');
 
-  dialog.showSaveDialog(window, {
-    title: 'Save Card Review Results',
-    defaultPath: defaultPath,
+    const saveResult = await dialog.showSaveDialog(window, {
+      title: 'Save Card Review Results',
+      defaultPath: safeDefaultPath,
       filters: [
         { name: 'HTML Files', extensions: ['html'] },
         { name: 'All Files', extensions: ['*'] }
       ]
-  }).then(result => {
-    if (!result.canceled && result.filePath) {
-      fs.writeFile(result.filePath, htmlContent, 'utf8', (err) => {
-        if (err) {
-          event.sender.send('save-html-result', { success: false, error: err.message });
-        } else {
-          event.sender.send('save-html-result', { success: true, path: result.filePath });
-        }
-      });
-    } else {
+    });
+
+    if (saveResult.canceled || !saveResult.filePath) {
       event.sender.send('save-html-result', { success: false, canceled: true });
+      return;
     }
-  }).catch(err => {
+
+    await fs.promises.writeFile(saveResult.filePath, htmlContent, 'utf8');
+
+    const messageBoxResult = await dialog.showMessageBox(window, {
+      type: 'info',
+      buttons: ['Open File', 'OK'],
+      title: 'Save Successful',
+      message: 'File saved successfully!',
+      detail: `The file has been saved at: ${saveResult.filePath}`
+    });
+
+    if (messageBoxResult.response === 0) {
+      shell.openPath(saveResult.filePath);
+    }
+
+    event.sender.send('save-html-result', { success: true, path: saveResult.filePath, opened: messageBoxResult.response === 0 });
+  } catch (err) {
     event.sender.send('save-html-result', { success: false, error: err.message });
-  });
+  }
 });

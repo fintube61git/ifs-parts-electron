@@ -57,4 +57,34 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.os }}-build
+        # The path to the directory containing the build artifacts.
         path: out/make
+        # What to do if no files are found. 'warn' will show a warning but not fail the workflow.
+        if-no-files-found: warn
+
+  release:
+    # This job depends on the 'build' job, so it will only run after all matrix builds are successful
+    needs: build
+    # Only run this job when a new tag is pushed that starts with 'v' (e.g., v1.0.0, v1.2.3)
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      # Required to create a release and upload assets
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          # The path where all artifacts will be downloaded
+          path: artifacts
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          # This will use the tag name for the release and automatically generate the release notes
+          # from your commit messages.
+          generate_release_notes: true
+          # The files to upload to the release. The pattern will match all files
+          # from the downloaded artifacts.
+          files: |
+            artifacts/**/*

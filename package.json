@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "npx electron-forge make"
+    "make": "electron-forge make"
   },
   "keywords": [
     "electron",
@@ -16,7 +16,9 @@
   "author": "Existenz",
   "license": "ISC",
   "type": "commonjs",
-  "dependencies": {},
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.1"
+  },
   "devDependencies": {
     "@electron-forge/cli": "^6.4.2",
     "@electron-forge/maker-deb": "^7.4.0",
