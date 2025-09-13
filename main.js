@@ -12,8 +12,8 @@ function createWindow() {
     height: 900,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
-    }
+      contextIsolation: false,
+    },
   });
 
   // Hide the menu bar
@@ -54,10 +54,10 @@ ipcMain.on('save-html-dialog', async (event, data) => {
     const saveResult = await dialog.showSaveDialog(window, {
       title: 'Save Card Review Results',
       defaultPath: safeDefaultPath,
-        filters: [
-          { name: 'HTML Files', extensions: ['html'] },
-          { name: 'All Files', extensions: ['*'] }
-        ]
+      filters: [
+        { name: 'HTML Files', extensions: ['html'] },
+        { name: 'All Files', extensions: ['*'] },
+      ],
     });
 
     if (saveResult.canceled || !saveResult.filePath) {
@@ -72,7 +72,7 @@ ipcMain.on('save-html-dialog', async (event, data) => {
       buttons: ['Open File', 'OK'],
       title: 'Save Successful',
       message: 'File saved successfully!',
-      detail: `The file has been saved at: ${saveResult.filePath}`
+      detail: `The file has been saved at: ${saveResult.filePath}`,
     });
 
     if (messageBoxResult.response === 0) {
@@ -82,7 +82,7 @@ ipcMain.on('save-html-dialog', async (event, data) => {
     event.sender.send('save-html-result', {
       success: true,
       path: saveResult.filePath,
-      opened: messageBoxResult.response === 0
+      opened: messageBoxResult.response === 0,
     });
   } catch (err) {
     event.sender.send('save-html-result', { success: false, error: err.message });

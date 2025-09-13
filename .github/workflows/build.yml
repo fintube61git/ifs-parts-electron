@@ -3,7 +3,7 @@ name: Build Electron App
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   workflow_dispatch:
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
           sudo chmod 600 /swapfile
           sudo mkswap /swapfile
           sudo swapon /swapfile
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

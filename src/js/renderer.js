@@ -18,383 +18,380 @@ const { ipcRenderer } = require('electron');
 // UTILITY FUNCTIONS
 // ==========================
 function shuffle(array) {
-    return array
-    .map(x => [Math.random(), x])
+  return array
+    .map((x) => [Math.random(), x])
     .sort((a, b) => a[0] - b[0])
-    .map(x => x[1]);
+    .map((x) => x[1]);
 }
 
 function getUniqueKey(index) {
-    const separator = ':::';
-    return images.length ? `${index}${separator}${images[index].path}` : '';
+  const separator = ':::';
+  return images.length ? `${index}${separator}${images[index].path}` : '';
 }
 
 function saveAnswer(key, questionId, value) {
-    if (!answers[key]) answers[key] = {};
-    answers[key][questionId] = value;
+  if (!answers[key]) answers[key] = {};
+  answers[key][questionId] = value;
 }
 
 function getAnswer(key, questionId) {
-    return answers[key] ? answers[key][questionId] : null;
+  return answers[key] ? answers[key][questionId] : null;
 }
 
 function adjustTextareaHeight(textarea) {
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.min(textarea.scrollHeight, 300) + 'px';
+  textarea.style.height = 'auto';
+  textarea.style.height = Math.min(textarea.scrollHeight, 300) + 'px';
 }
 
 function showMainApp() {
-    const mainContent = document.getElementById('main') || document.querySelector('main');
-    if (mainContent) {
-        mainContent.style.display = 'block';
-    }
+  const mainContent = document.getElementById('main') || document.querySelector('main');
+  if (mainContent) {
+    mainContent.style.display = 'block';
+  }
 }
 
 function showEmptyState(message) {
-    const options = document.getElementById('options');
-    const canvas = document.getElementById('canvas');
+  const options = document.getElementById('options');
+  const canvas = document.getElementById('canvas');
 
-    canvas.src = '';
-    canvas.alt = 'No image loaded';
+  canvas.src = '';
+  canvas.alt = 'No image loaded';
 
-    options.innerHTML = `
+  options.innerHTML = `
     <div class="empty-state">
     <h3>Files not found</h3>
     <p>${message}</p>
     </div>
     `;
 
-    updateCardCounter();
-    updateNavigationButtons();
+  updateCardCounter();
+  updateNavigationButtons();
 }
 
 // ==========================
 // AUTOMATIC FILE LOADING
 // ==========================
 async function loadFilesOnStartup() {
-    const baseDir = __dirname;
-    const imagesPath = path.join(baseDir, 'images');
-    const questionsPath = path.join(baseDir, 'data', 'questions.json');
+  const baseDir = __dirname;
+  const imagesPath = path.join(baseDir, 'images');
+  const questionsPath = path.join(baseDir, 'data', 'questions.json');
 
-    try {
-        // Load questions.json
-        if (fs.existsSync(questionsPath)) {
-            const questionsData = fs.readFileSync(questionsPath, 'utf8');
-            questions = JSON.parse(questionsData);
-            console.log('✅ Questions loaded successfully.');
-        } else {
-            showEmptyState('questions.json not found in the data folder.');
-            return;
-        }
-
-        // Load images
-        if (fs.existsSync(imagesPath)) {
-            const imageFileNames = fs.readdirSync(imagesPath);
-            images = imageFileNames
-            .filter(f => /\.(png|jpg|jpeg|gif|webp)$/i.test(f))
-            .map(f => ({ name: f, path: path.join(imagesPath, f) }));
-
-            if (images.length > 0) {
-                images = shuffle(images);
-                console.log(`✅ ${images.length} images loaded successfully.`);
-            } else {
-                showEmptyState('No valid images found in the images folder.');
-                return;
-            }
-        } else {
-            showEmptyState('Images folder not found.');
-            return;
-        }
-
-        // Initialize the UI once all files are loaded
-        showImage();
-
-    } catch (error) {
-        console.error('❌ An error occurred during file loading:', error);
-        showEmptyState('An error occurred during file loading. Check the console for details.');
+  try {
+    // Load questions.json
+    if (fs.existsSync(questionsPath)) {
+      const questionsData = fs.readFileSync(questionsPath, 'utf8');
+      questions = JSON.parse(questionsData);
+      console.log('✅ Questions loaded successfully.');
+    } else {
+      showEmptyState('questions.json not found in the data folder.');
+      return;
     }
+
+    // Load images
+    if (fs.existsSync(imagesPath)) {
+      const imageFileNames = fs.readdirSync(imagesPath);
+      images = imageFileNames
+        .filter((f) => /\.(png|jpg|jpeg|gif|webp)$/i.test(f))
+        .map((f) => ({ name: f, path: path.join(imagesPath, f) }));
+
+      if (images.length > 0) {
+        images = shuffle(images);
+        console.log(`✅ ${images.length} images loaded successfully.`);
+      } else {
+        showEmptyState('No valid images found in the images folder.');
+        return;
+      }
+    } else {
+      showEmptyState('Images folder not found.');
+      return;
+    }
+
+    // Initialize the UI once all files are loaded
+    showImage();
+  } catch (error) {
+    console.error('❌ An error occurred during file loading:', error);
+    showEmptyState('An error occurred during file loading. Check the console for details.');
+  }
 }
 
 // ==========================
 // IMAGE DISPLAY AND NAVIGATION
 // ==========================
 function showImage() {
-    if (!images.length || !questions.length) {
-        showEmptyState('Please ensure your images folder and questions.json file are present.');
-        return;
-    }
+  if (!images.length || !questions.length) {
+    showEmptyState('Please ensure your images folder and questions.json file are present.');
+    return;
+  }
 
-    const canvas = document.getElementById('canvas');
-    const imageFile = images[currentIndex];
+  const canvas = document.getElementById('canvas');
+  const imageFile = images[currentIndex];
 
-    canvas.src = `file://${imageFile.path}`;
-    canvas.alt = `Review image: ${imageFile.name}`;
+  canvas.src = `file://${imageFile.path}`;
+  canvas.alt = `Review image: ${imageFile.name}`;
 
-    updateCardCounter();
-    renderQuestions();
-    updateNavigationButtons();
+  updateCardCounter();
+  renderQuestions();
+  updateNavigationButtons();
 }
 
 function updateCardCounter() {
-    const counter = document.getElementById('cardCounter');
-    if (images.length) {
-        const responsesCount = Object.keys(answers).length;
-        counter.textContent = `Card ${currentIndex + 1} of ${images.length} • ${responsesCount} cards with responses`;
-    } else {
-        counter.textContent = '';
-    }
+  const counter = document.getElementById('cardCounter');
+  if (images.length) {
+    const responsesCount = Object.keys(answers).length;
+    counter.textContent = `Card ${currentIndex + 1} of ${images.length} • ${responsesCount} cards with responses`;
+  } else {
+    counter.textContent = '';
+  }
 }
 
 function updateNavigationButtons() {
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
 
-    prevBtn.disabled = currentIndex <= 0 || images.length === 0;
-    nextBtn.disabled = currentIndex >= images.length - 1 || images.length === 0;
+  prevBtn.disabled = currentIndex <= 0 || images.length === 0;
+  nextBtn.disabled = currentIndex >= images.length - 1 || images.length === 0;
 }
 
 // ==========================
 // QUESTION RENDERING
 // ==========================
 function renderQuestions() {
-    const options = document.getElementById('options');
-    const key = getUniqueKey(currentIndex);
+  const options = document.getElementById('options');
+  const key = getUniqueKey(currentIndex);
 
-    options.innerHTML = '';
+  options.innerHTML = '';
 
-    questions.forEach((question, qIndex) => {
-        const qrow = document.createElement('div');
-        qrow.className = 'qrow';
+  questions.forEach((question, qIndex) => {
+    const qrow = document.createElement('div');
+    qrow.className = 'qrow';
 
-        const qText = document.createElement('div');
-        qText.textContent = question.text;
-        qrow.appendChild(qText);
+    const qText = document.createElement('div');
+    qText.textContent = question.text;
+    qrow.appendChild(qText);
 
-        if (question.type === 'radio') {
-            const optionGroup = document.createElement('div');
-            optionGroup.className = 'optionGroup';
+    if (question.type === 'radio') {
+      const optionGroup = document.createElement('div');
+      optionGroup.className = 'optionGroup';
 
-            question.options.forEach((option, oIndex) => {
-                const label = document.createElement('label');
-                const radio = document.createElement('input');
-                radio.type = 'radio';
-                radio.name = `q${qIndex}`;
-                radio.value = option;
-                radio.id = `q${qIndex}_${oIndex}`;
+      question.options.forEach((option, oIndex) => {
+        const label = document.createElement('label');
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = `q${qIndex}`;
+        radio.value = option;
+        radio.id = `q${qIndex}_${oIndex}`;
 
-                const savedAnswer = getAnswer(key, qIndex);
-                if (savedAnswer === option) {
-                    radio.checked = true;
-                    label.classList.add('selected');
-                }
-
-                radio.addEventListener('change', () => {
-                    if (radio.checked) {
-                        saveAnswer(key, qIndex, option);
-                        optionGroup.querySelectorAll('label').forEach(l => l.classList.remove('selected'));
-                        label.classList.add('selected');
-                    }
-                });
-
-                label.appendChild(radio);
-                label.appendChild(document.createTextNode(option));
-                optionGroup.appendChild(label);
-            });
-
-            qrow.appendChild(optionGroup);
+        const savedAnswer = getAnswer(key, qIndex);
+        if (savedAnswer === option) {
+          radio.checked = true;
+          label.classList.add('selected');
         }
 
-        else if (question.type === 'checkbox') {
-            const optionGroup = document.createElement('div');
-            optionGroup.className = 'optionGroup';
-            const savedAnswers = getAnswer(key, qIndex) || [];
+        radio.addEventListener('change', () => {
+          if (radio.checked) {
+            saveAnswer(key, qIndex, option);
+            optionGroup.querySelectorAll('label').forEach((l) => l.classList.remove('selected'));
+            label.classList.add('selected');
+          }
+        });
 
-            question.options.forEach((option, oIndex) => {
-                const label = document.createElement('label');
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = option;
-                checkbox.id = `q${qIndex}_${oIndex}`;
+        label.appendChild(radio);
+        label.appendChild(document.createTextNode(option));
+        optionGroup.appendChild(label);
+      });
 
-                if (savedAnswers.includes(option)) {
-                    checkbox.checked = true;
-                    label.classList.add('selected');
-                }
+      qrow.appendChild(optionGroup);
+    } else if (question.type === 'checkbox') {
+      const optionGroup = document.createElement('div');
+      optionGroup.className = 'optionGroup';
+      const savedAnswers = getAnswer(key, qIndex) || [];
 
-                checkbox.addEventListener('change', () => {
-                    const currentAnswers = getAnswer(key, qIndex) || [];
-                    if (checkbox.checked) {
-                        if (!currentAnswers.includes(option)) {
-                            currentAnswers.push(option);
-                        }
-                        label.classList.add('selected');
-                    } else {
-                        const index = currentAnswers.indexOf(option);
-                        if (index > -1) {
-                            currentAnswers.splice(index, 1);
-                        }
-                        label.classList.remove('selected');
-                    }
-                    saveAnswer(key, qIndex, currentAnswers);
-                });
+      question.options.forEach((option, oIndex) => {
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = option;
+        checkbox.id = `q${qIndex}_${oIndex}`;
 
-                label.appendChild(checkbox);
-                label.appendChild(document.createTextNode(option));
-                optionGroup.appendChild(label);
-            });
-
-            qrow.appendChild(optionGroup);
+        if (savedAnswers.includes(option)) {
+          checkbox.checked = true;
+          label.classList.add('selected');
         }
 
-        else if (question.type === 'text') {
-            const textarea = document.createElement('textarea');
-            textarea.placeholder = 'Enter your response here...';
-            textarea.value = getAnswer(key, qIndex) || '';
-            textarea.rows = 2; // Sets the default height to two lines
-            adjustTextareaHeight(textarea);
+        checkbox.addEventListener('change', () => {
+          const currentAnswers = getAnswer(key, qIndex) || [];
+          if (checkbox.checked) {
+            if (!currentAnswers.includes(option)) {
+              currentAnswers.push(option);
+            }
+            label.classList.add('selected');
+          } else {
+            const index = currentAnswers.indexOf(option);
+            if (index > -1) {
+              currentAnswers.splice(index, 1);
+            }
+            label.classList.remove('selected');
+          }
+          saveAnswer(key, qIndex, currentAnswers);
+        });
 
-            textarea.addEventListener('input', () => {
-                saveAnswer(key, qIndex, textarea.value);
-                adjustTextareaHeight(textarea);
-            });
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(option));
+        optionGroup.appendChild(label);
+      });
 
-            qrow.appendChild(textarea);
-        }
+      qrow.appendChild(optionGroup);
+    } else if (question.type === 'text') {
+      const textarea = document.createElement('textarea');
+      textarea.placeholder = 'Enter your response here...';
+      textarea.value = getAnswer(key, qIndex) || '';
+      textarea.rows = 2; // Sets the default height to two lines
+      adjustTextareaHeight(textarea);
 
-        options.appendChild(qrow);
-    });
+      textarea.addEventListener('input', () => {
+        saveAnswer(key, qIndex, textarea.value);
+        adjustTextareaHeight(textarea);
+      });
+
+      qrow.appendChild(textarea);
+    }
+
+    options.appendChild(qrow);
+  });
 }
 
 // ==========================
 // EVENT LISTENERS
 // ==========================
 document.addEventListener('DOMContentLoaded', () => {
-    loadFilesOnStartup();
+  loadFilesOnStartup();
 
-    // Theme Toggle
-    const themeToggle = document.getElementById('themeToggle');
-    const htmlElement = document.documentElement;
+  // Theme Toggle
+  const themeToggle = document.getElementById('themeToggle');
+  const htmlElement = document.documentElement;
 
-    function updateThemeToggleIcon() {
-        if (htmlElement.classList.contains('dark-mode')) {
-            themeToggle.textContent = '☀️';
-            themeToggle.setAttribute('aria-label', 'Toggle light mode');
-            themeToggle.setAttribute('title', 'Switch to light mode');
-        } else {
-            themeToggle.textContent = '🌙';
-            themeToggle.setAttribute('aria-label', 'Toggle dark mode');
-            themeToggle.setAttribute('title', 'Switch to dark mode');
-        }
+  function updateThemeToggleIcon() {
+    if (htmlElement.classList.contains('dark-mode')) {
+      themeToggle.textContent = '☀️';
+      themeToggle.setAttribute('aria-label', 'Toggle light mode');
+      themeToggle.setAttribute('title', 'Switch to light mode');
+    } else {
+      themeToggle.textContent = '🌙';
+      themeToggle.setAttribute('aria-label', 'Toggle dark mode');
+      themeToggle.setAttribute('title', 'Switch to dark mode');
     }
+  }
 
-    themeToggle.addEventListener('click', () => {
-        htmlElement.classList.toggle('dark-mode');
-        updateThemeToggleIcon();
-    });
-
-    // Initial check for theme icon
+  themeToggle.addEventListener('click', () => {
+    htmlElement.classList.toggle('dark-mode');
     updateThemeToggleIcon();
+  });
 
-    // Navigation Buttons
-    document.getElementById('prevBtn').addEventListener('click', () => {
-        if (currentIndex > 0) {
-            currentIndex--;
-            showImage();
-        }
-    });
+  // Initial check for theme icon
+  updateThemeToggleIcon();
 
-    document.getElementById('nextBtn').addEventListener('click', () => {
-        if (currentIndex < images.length - 1) {
-            currentIndex++;
-            showImage();
-        }
-    });
+  // Navigation Buttons
+  document.getElementById('prevBtn').addEventListener('click', () => {
+    if (currentIndex > 0) {
+      currentIndex--;
+      showImage();
+    }
+  });
 
-    // Keyboard navigation
-    document.addEventListener('keydown', (e) => {
-        if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
-            return;
-        }
-        if (e.key === 'ArrowLeft' && currentIndex > 0) {
-            currentIndex--;
-            showImage();
-        } else if (e.key === 'ArrowRight' && currentIndex < images.length - 1) {
-            currentIndex++;
-            showImage();
-        }
-    });
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    if (currentIndex < images.length - 1) {
+      currentIndex++;
+      showImage();
+    }
+  });
 
-    // Zoom Controls
-    document.getElementById('zoomIn').addEventListener('click', () => {
-        zoom = Math.min(zoom * 1.2, 5);
-        document.getElementById('canvas').style.transform = `scale(${zoom})`;
-    });
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
+      return;
+    }
+    if (e.key === 'ArrowLeft' && currentIndex > 0) {
+      currentIndex--;
+      showImage();
+    } else if (e.key === 'ArrowRight' && currentIndex < images.length - 1) {
+      currentIndex++;
+      showImage();
+    }
+  });
 
-    document.getElementById('zoomOut').addEventListener('click', () => {
-        zoom = Math.max(zoom / 1.2, 0.1);
-        document.getElementById('canvas').style.transform = `scale(${zoom})`;
-    });
+  // Zoom Controls
+  document.getElementById('zoomIn').addEventListener('click', () => {
+    zoom = Math.min(zoom * 1.2, 5);
+    document.getElementById('canvas').style.transform = `scale(${zoom})`;
+  });
 
-    document.getElementById('fitScreen').addEventListener('click', () => {
-        zoom = 1;
-        document.getElementById('canvas').style.transform = 'scale(1)';
-    });
+  document.getElementById('zoomOut').addEventListener('click', () => {
+    zoom = Math.max(zoom / 1.2, 0.1);
+    document.getElementById('canvas').style.transform = `scale(${zoom})`;
+  });
 
-    // Help Toggle
-    document.getElementById('helpToggle').addEventListener('click', () => {
-        const helpText = document.getElementById('helpText');
-        const button = document.getElementById('helpToggle');
-        helpText.classList.toggle('visible');
-        const isVisible = helpText.classList.contains('visible');
-        button.setAttribute('aria-expanded', isVisible);
-    });
+  document.getElementById('fitScreen').addEventListener('click', () => {
+    zoom = 1;
+    document.getElementById('canvas').style.transform = 'scale(1)';
+  });
 
-    // Clear Functions
-    document.getElementById('clearCurrentBtn').addEventListener('click', () => {
-        if (!confirm('Clear all responses for the current image?')) return;
-        const key = getUniqueKey(currentIndex);
-        if (answers[key]) {
-            delete answers[key];
-            renderQuestions();
-            updateCardCounter();
-        }
-    });
+  // Help Toggle
+  document.getElementById('helpToggle').addEventListener('click', () => {
+    const helpText = document.getElementById('helpText');
+    const button = document.getElementById('helpToggle');
+    helpText.classList.toggle('visible');
+    const isVisible = helpText.classList.contains('visible');
+    button.setAttribute('aria-expanded', isVisible);
+  });
 
-    document.getElementById('clearAllBtn').addEventListener('click', () => {
-        if (!confirm('Clear ALL responses for ALL images? This cannot be undone.')) return;
-        answers = {};
-        renderQuestions();
-        updateCardCounter();
-    });
+  // Clear Functions
+  document.getElementById('clearCurrentBtn').addEventListener('click', () => {
+    if (!confirm('Clear all responses for the current image?')) return;
+    const key = getUniqueKey(currentIndex);
+    if (answers[key]) {
+      delete answers[key];
+      renderQuestions();
+      updateCardCounter();
+    }
+  });
 
-    // Export Functions
-    function imageToBase64(filePath) {
-        try {
-            const data = fs.readFileSync(filePath);
-            const base64String = data.toString('base64');
-            const mimeType = 'image/' + path.extname(filePath).slice(1);
-            return `data:${mimeType};base64,${base64String}`;
-        } catch (error) {
-            console.error(`Error converting ${filePath} to Base64:`, error);
-            return '';
-        }
+  document.getElementById('clearAllBtn').addEventListener('click', () => {
+    if (!confirm('Clear ALL responses for ALL images? This cannot be undone.')) return;
+    answers = {};
+    renderQuestions();
+    updateCardCounter();
+  });
+
+  // Export Functions
+  function imageToBase64(filePath) {
+    try {
+      const data = fs.readFileSync(filePath);
+      const base64String = data.toString('base64');
+      const mimeType = 'image/' + path.extname(filePath).slice(1);
+      return `data:${mimeType};base64,${base64String}`;
+    } catch (error) {
+      console.error(`Error converting ${filePath} to Base64:`, error);
+      return '';
+    }
+  }
+
+  document.getElementById('exportHtml').addEventListener('click', () => {
+    const exportButton = document.getElementById('exportHtml');
+    const cardsWithResponses = Object.keys(answers).filter(
+      (key) => Object.keys(answers[key]).length > 0
+    );
+
+    if (cardsWithResponses.length === 0) {
+      alert('No responses to export. Please answer some questions first.');
+      return;
     }
 
-    document.getElementById('exportHtml').addEventListener('click', () => {
-        const exportButton = document.getElementById('exportHtml');
-        const cardsWithResponses = Object.keys(answers).filter(key => Object.keys(answers[key]).length > 0);
+    exportButton.disabled = true;
+    exportButton.textContent = 'Exporting...';
 
-        if (cardsWithResponses.length === 0) {
-            alert('No responses to export. Please answer some questions first.');
-            return;
-        }
-
-        exportButton.disabled = true;
-        exportButton.textContent = 'Exporting...';
-
-        try {
-            const originalStyles = document.querySelector('link[rel="stylesheet"]').outerHTML;
-            let htmlContent = `<!DOCTYPE html>
+    try {
+      const originalStyles = document.querySelector('link[rel="stylesheet"]').outerHTML;
+      let htmlContent = `<!DOCTYPE html>
             <html lang="en">
             <head>
             <meta charset="UTF-8">
@@ -453,13 +450,13 @@ document.addEventListener('DOMContentLoaded', () => {
             <p>Total cards with responses: ${cardsWithResponses.length}</p>
             </div>`;
 
-            for (const key of cardsWithResponses) {
-                const parts = key.split(':::');
-                const filePath = parts[1];
-                const filename = path.basename(filePath);
-                const imageUrl = imageToBase64(filePath);
+      for (const key of cardsWithResponses) {
+        const parts = key.split(':::');
+        const filePath = parts[1];
+        const filename = path.basename(filePath);
+        const imageUrl = imageToBase64(filePath);
 
-                htmlContent += `
+        htmlContent += `
                 <div class="report-card">
                 <div class="report-card-image">
                 <h2 class="filename">${filename}</h2>
@@ -468,64 +465,68 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="report-card-responses">
                 `;
 
-                questions.forEach((question, qIndex) => {
-                    const answer = getAnswer(key, qIndex);
-                    htmlContent += `<div class="qrow"><div>${question.text}</div>`;
-                    if (question.type === 'radio') {
-                        htmlContent += `<div class="optionGroup">`;
-                        question.options.forEach(option => {
-                            const isChecked = (answer === option);
-                            htmlContent += `<label class="${isChecked ? 'selected' : ''}">
+        questions.forEach((question, qIndex) => {
+          const answer = getAnswer(key, qIndex);
+          htmlContent += `<div class="qrow"><div>${question.text}</div>`;
+          if (question.type === 'radio') {
+            htmlContent += `<div class="optionGroup">`;
+            question.options.forEach((option) => {
+              const isChecked = answer === option;
+              htmlContent += `<label class="${isChecked ? 'selected' : ''}">
                             <input type="radio" ${isChecked ? 'checked' : ''} disabled>
                             ${option}
                             </label>`;
-                        });
-                        htmlContent += `</div>`;
-                    } else if (question.type === 'checkbox') {
-                        htmlContent += `<div class="optionGroup">`;
-                        const savedAnswers = answer || [];
-                        question.options.forEach(option => {
-                            const isChecked = savedAnswers.includes(option);
-                            htmlContent += `<label class="${isChecked ? 'selected' : ''}">
+            });
+            htmlContent += `</div>`;
+          } else if (question.type === 'checkbox') {
+            htmlContent += `<div class="optionGroup">`;
+            const savedAnswers = answer || [];
+            question.options.forEach((option) => {
+              const isChecked = savedAnswers.includes(option);
+              htmlContent += `<label class="${isChecked ? 'selected' : ''}">
                             <input type="checkbox" ${isChecked ? 'checked' : ''} disabled>
                             ${option}
                             </label>`;
-                        });
-                        htmlContent += `</div>`;
-                    } else if (question.type === 'text') {
-                        const textAnswer = answer || '';
-                        htmlContent += `<textarea disabled>${textAnswer.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</textarea>`;
-                    }
-                    htmlContent += `</div>`;
-                });
-                htmlContent += `</div></div>`;
-            }
-            htmlContent += `</body></html>`;
+            });
+            htmlContent += `</div>`;
+          } else if (question.type === 'text') {
+            const textAnswer = answer || '';
+            htmlContent += `<textarea disabled>${textAnswer.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>`;
+          }
+          htmlContent += `</div>`;
+        });
+        htmlContent += `</div></div>`;
+      }
+      htmlContent += `</body></html>`;
 
-            const now = new Date();
-            const date = now.toISOString().slice(0, 10);
-            const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-            const defaultPath = `CardReview_${date}_${time}.html`;
-            ipcRenderer.send('save-html-dialog', { htmlContent, defaultPath });
-        } catch (error) {
-            console.error("Failed to generate HTML content:", error);
-            alert("An error occurred during HTML generation. Please check the console for details.");
-            exportButton.disabled = false;
-            exportButton.textContent = 'Export Browser File';
-        }
-    });
+      const now = new Date();
+      const date = now.toISOString().slice(0, 10);
+      const time = now.toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      const defaultPath = `CardReview_${date}_${time}.html`;
+      ipcRenderer.send('save-html-dialog', { htmlContent, defaultPath });
+    } catch (error) {
+      console.error('Failed to generate HTML content:', error);
+      alert('An error occurred during HTML generation. Please check the console for details.');
+      exportButton.disabled = false;
+      exportButton.textContent = 'Export Browser File';
+    }
+  });
 
-    ipcRenderer.on('save-html-result', (event, result) => {
-        const exportButton = document.getElementById('exportHtml');
-        exportButton.disabled = false;
-        exportButton.textContent = 'Export Browser File';
-        if (result.success) {
-            alert(`Export successful! File saved to: ${result.path}`);
-        } else if (result.canceled) {
-            console.log("Save dialog was canceled.");
-        } else {
-            alert("An error occurred during the export. Please check the console for details.");
-            console.error("Failed to export HTML:", result.error);
-        }
-    });
+  ipcRenderer.on('save-html-result', (event, result) => {
+    const exportButton = document.getElementById('exportHtml');
+    exportButton.disabled = false;
+    exportButton.textContent = 'Export Browser File';
+    if (result.success) {
+      alert(`Export successful! File saved to: ${result.path}`);
+    } else if (result.canceled) {
+      console.log('Save dialog was canceled.');
+    } else {
+      alert('An error occurred during the export. Please check the console for details.');
+      console.error('Failed to export HTML:', result.error);
+    }
+  });
 });

@@ -6,7 +6,10 @@
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "clean": "git clean -xfd && rm -rf node_modules && npm ci"
   },
   "keywords": [
     "electron",
@@ -25,7 +28,10 @@
     "@electron-forge/maker-dmg": "^7.4.0",
     "@electron-forge/maker-rpm": "^7.4.0",
     "@electron-forge/maker-squirrel": "^7.4.0",
-    "electron": "^28.2.2"
+    "electron": "^28.2.2",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "typescript-language-server": "^4.4.1"
   },
   "config": {
     "forge": {

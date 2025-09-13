@@ -1,94 +1,132 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IFS Parts</title>
-<link rel="icon" href="icon.png" type="image/png">
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IFS Parts</title>
+    <link rel="icon" href="icon.png" type="image/png" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
 
-<a href="#main" class="skip-link">Skip to main content</a>
+    <header>
+      <h1 class="topTitle">Explore Your Parts</h1>
 
-<header>
-  <h1 class="topTitle">Explore Your Parts</h1>
+      <nav class="top" id="mainControls">
+        <button id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark/light mode">
+          🌙
+        </button>
+        <div id="cardCounter" role="status" aria-live="polite"></div>
+        <button id="helpToggle" class="help-btn" aria-expanded="false" aria-controls="helpText">
+          ℹ️
+        </button>
+      </nav>
 
-  <nav class="top" id="mainControls">
-    <button id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark/light mode">🌙</button>
-    <div id="cardCounter" role="status" aria-live="polite"></div>
-    <button id="helpToggle" class="help-btn" aria-expanded="false" aria-controls="helpText">
-      ℹ️
-    </button>
-  </nav>
-
-  <div id="helpText" role="region" aria-labelledby="helpToggle">
-    <div class="help-section">
-      <h4>🎯 Quick Start</h4>
-      <p>This application automatically loads images and questions on startup.</p>
-      <ol>
-        <li><strong>Start Reviewing:</strong> Use ← Prev / Next → to navigate between images and answer questions.</li>
-        <li><strong>Answering:</strong> Fill out the questions for each image. Your responses are automatically saved.</li>
-      </ol>
-    </div>
-    <div class="help-section">
-        <h4>🎮 Using the Application</h4>
-        <ul>
-          <li><strong>Navigation:</strong> Use ← Prev / Next → buttons or arrow keys to move between cards.</li>
-          <li><strong>Zoom:</strong> Use +/- buttons or "⊞" to fit image to screen.</li>
-          <li><strong>Clearing Responses:</strong> Use "Clear Current" or "Clear All" to erase responses.</li>
-        </ul>
-      </div>
-    <div class="help-section">
-      <h4>💾 Export Options</h4>
-      <ul>
-        <li><strong>Export Browser File:</strong> Creates a viewable HTML file with all your responses.</li>
-      </ul>
-    </div>
-  </div>
-</header>
-
-<main id="main">
-  <div id="viewer">
-    <section id="canvasWrap" aria-label="Image viewer">
-      <div class="navGroup">
-        <button id="prevBtn" aria-label="Previous image" title="Previous image (Left arrow key)">← Prev</button>
-        <button id="nextBtn" aria-label="Next image" title="Next image (Right arrow key)">Next →</button>
-      </div>
-      <img id="canvas" alt="Current review image" aria-describedby="cardCounter">
-      <div id="canvasControls" role="group" aria-label="Image zoom controls">
-        <button id="zoomIn" aria-label="Zoom in" title="Zoom in image">+</button>
-        <button id="zoomOut" aria-label="Zoom out" title="Zoom out image">−</button>
-        <button id="fitScreen" aria-label="Fit to screen" title="Fit image to screen">⊞</button>
-      </div>
-    </section>
-
-    <section id="side" aria-label="Questions and responses">
-      <div class="questions-wrapper">
-        <div id="options" role="form" aria-label="Image evaluation questions"></div>
-      </div>
-
-      <footer class="bottomButtons">
-        <div class="buttonGroup clearGroup">
-          <button id="clearCurrentBtn" class="clear-btn" aria-label="Clear responses for current image">Clear Current</button>
-          <button id="clearAllBtn" class="clear-btn" aria-label="Clear all responses">Clear All</button>
+      <div id="helpText" role="region" aria-labelledby="helpToggle">
+        <div class="help-section">
+          <h4>🎯 Quick Start</h4>
+          <p>This application automatically loads images and questions on startup.</p>
+          <ol>
+            <li>
+              <strong>Start Reviewing:</strong> Use ← Prev / Next → to navigate between images and
+              answer questions.
+            </li>
+            <li>
+              <strong>Answering:</strong> Fill out the questions for each image. Your responses are
+              automatically saved.
+            </li>
+          </ol>
         </div>
-        <div class="buttonGroup exportGroup">
-          <button id="exportHtml" class="export-btn" title="Exports all cards that have at least one response as a file for web browser viewing" aria-label="Export as HTML file">Export Browser File</button>
+        <div class="help-section">
+          <h4>🎮 Using the Application</h4>
+          <ul>
+            <li>
+              <strong>Navigation:</strong> Use ← Prev / Next → buttons or arrow keys to move between
+              cards.
+            </li>
+            <li><strong>Zoom:</strong> Use +/- buttons or "⊞" to fit image to screen.</li>
+            <li>
+              <strong>Clearing Responses:</strong> Use "Clear Current" or "Clear All" to erase
+              responses.
+            </li>
+          </ul>
         </div>
-      </footer>
-    </section>
-  </div>
-</main>
+        <div class="help-section">
+          <h4>💾 Export Options</h4>
+          <ul>
+            <li>
+              <strong>Export Browser File:</strong> Creates a viewable HTML file with all your
+              responses.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
 
-<script>
-    // Check for user's preferred color scheme and apply dark mode if needed
-    const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
-    if (prefersDarkScheme.matches) {
+    <main id="main">
+      <div id="viewer">
+        <section id="canvasWrap" aria-label="Image viewer">
+          <div class="navGroup">
+            <button
+              id="prevBtn"
+              aria-label="Previous image"
+              title="Previous image (Left arrow key)"
+            >
+              ← Prev
+            </button>
+            <button id="nextBtn" aria-label="Next image" title="Next image (Right arrow key)">
+              Next →
+            </button>
+          </div>
+          <img id="canvas" alt="Current review image" aria-describedby="cardCounter" />
+          <div id="canvasControls" role="group" aria-label="Image zoom controls">
+            <button id="zoomIn" aria-label="Zoom in" title="Zoom in image">+</button>
+            <button id="zoomOut" aria-label="Zoom out" title="Zoom out image">−</button>
+            <button id="fitScreen" aria-label="Fit to screen" title="Fit image to screen">⊞</button>
+          </div>
+        </section>
+
+        <section id="side" aria-label="Questions and responses">
+          <div class="questions-wrapper">
+            <div id="options" role="form" aria-label="Image evaluation questions"></div>
+          </div>
+
+          <footer class="bottomButtons">
+            <div class="buttonGroup clearGroup">
+              <button
+                id="clearCurrentBtn"
+                class="clear-btn"
+                aria-label="Clear responses for current image"
+              >
+                Clear Current
+              </button>
+              <button id="clearAllBtn" class="clear-btn" aria-label="Clear all responses">
+                Clear All
+              </button>
+            </div>
+            <div class="buttonGroup exportGroup">
+              <button
+                id="exportHtml"
+                class="export-btn"
+                title="Exports all cards that have at least one response as a file for web browser viewing"
+                aria-label="Export as HTML file"
+              >
+                Export Browser File
+              </button>
+            </div>
+          </footer>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      // Check for user's preferred color scheme and apply dark mode if needed
+      const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+      if (prefersDarkScheme.matches) {
         document.documentElement.classList.add('dark-mode');
-    }
-</script>
-<script src="js/renderer.js"></script>
-
-</body>
+      }
+    </script>
+    <script src="js/renderer.js"></script>
+  </body>
 </html>

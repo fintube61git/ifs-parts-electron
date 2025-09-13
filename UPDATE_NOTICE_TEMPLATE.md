@@ -5,11 +5,12 @@ This file contains the email template for notifying existing testers about a new
 ---
 
 ### **Email Subject:**
+
 (Copy this line for your email's subject)
 New Test Version Available: [App Name] vX.X.X
 
-
 ### **Email Body:**
+
 (Copy everything below this line for the email's body)
 Hi team,
 
