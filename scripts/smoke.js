@@ -13,7 +13,13 @@ const electronBin = path.resolve(
   process.platform === 'win32' ? 'electron.cmd' : 'electron'
 );
 
-const child = spawn(electronBin, ['.'], {
+// Add --no-sandbox automatically in CI to avoid Chrome sandbox errors
+const args = ['.'];
+if (process.env.CI) {
+  args.push('--no-sandbox');
+}
+
+const child = spawn(electronBin, args, {
   env: {
     ...process.env,
     ELECTRON_SMOKE: '1',
