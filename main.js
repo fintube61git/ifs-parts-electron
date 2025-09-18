@@ -88,3 +88,22 @@ ipcMain.on('save-html-dialog', async (event, data) => {
     event.sender.send('save-html-result', { success: false, error: err.message });
   }
 });
+
+// ---- SMOKE HOOK (safe, additive) ----
+try {
+  const { app } = require('electron');
+  if (process.env.ELECTRON_SMOKE === '1') {
+    const done = () => {
+      console.log('[smoke] app ready');
+      app.quit();
+    };
+    if (app.isReady && app.isReady()) {
+      done();
+    } else if (app && app.once) {
+      app.once('ready', done);
+    }
+  }
+} catch (_) {
+  // ignore
+}
+// ---- END SMOKE HOOK ----

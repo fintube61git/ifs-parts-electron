@@ -19,3 +19,6 @@ Thumbs.db
 *.iml
 .sublime-project
 .sublime-workspace
+
+# local backups
+*.bak

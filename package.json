@@ -9,7 +9,9 @@
     "make": "electron-forge make",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "clean": "git clean -xfd && rm -rf node_modules && npm ci"
+    "clean": "git clean -xfd && rm -rf node_modules && npm ci",
+    "smoke": "node scripts/smoke.js",
+    "check": "npm run format:check && npm run smoke"
   },
   "keywords": [
     "electron",
