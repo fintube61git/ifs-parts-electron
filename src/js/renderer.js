@@ -530,3 +530,99 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// ==== THEME TOGGLE (safe, additive) =========================================
+(function setupTheme() {
+  try {
+    const root = document.documentElement;
+    const KEY = 'ifs.theme'; // 'light' | 'dark'
+
+    // Initial mode: saved -> system -> light
+    const saved = localStorage.getItem(KEY);
+    const systemDark =
+      window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initial = saved || (systemDark ? 'dark' : 'light');
+    apply(initial);
+
+    // Track system changes only if user hasn't chosen manually
+    const mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    mq &&
+      mq.addEventListener &&
+      mq.addEventListener('change', (e) => {
+        if (!localStorage.getItem(KEY)) apply(e.matches ? 'dark' : 'light');
+      });
+
+    // Button + hotkey
+    const btn = document.getElementById('themeToggle');
+
+    function apply(mode) {
+      if (mode === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+        if (btn) btn.setAttribute('aria-pressed', 'true');
+      } else {
+        root.removeAttribute('data-theme');
+        if (btn) btn.setAttribute('aria-pressed', 'false');
+      }
+    }
+
+    function toggle() {
+      const isDark = root.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      localStorage.setItem(KEY, next);
+      apply(next);
+    }
+
+    btn && btn.addEventListener('click', toggle);
+
+    // Alt+T (or Meta+T) shortcut
+    window.addEventListener('keydown', (e) => {
+      const key = (e.key || '').toLowerCase();
+      if ((e.altKey || e.metaKey) && key === 't') {
+        e.preventDefault();
+        toggle();
+      }
+    });
+  } catch (err) {
+    console.warn('Theme setup failed:', err);
+  }
+})();
+// ==== /THEME TOGGLE ==========================================================
+
+// ---- Extra hotkeys for theme toggle (Linux-friendly) ----
+(function addExtraThemeHotkeys() {
+  try {
+    const root = document.documentElement;
+    const isDark = () => root.getAttribute('data-theme') === 'dark';
+    const apply = (mode) => {
+      if (mode === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+        const btn = document.getElementById('themeToggle');
+        btn && btn.setAttribute('aria-pressed', 'true');
+      } else {
+        root.removeAttribute('data-theme');
+        const btn = document.getElementById('themeToggle');
+        btn && btn.setAttribute('aria-pressed', 'false');
+      }
+    };
+    const toggle = () => apply(isDark() ? 'light' : 'dark');
+
+    window.addEventListener('keydown', (e) => {
+      const k = (e.key || '').toLowerCase();
+
+      // F6
+      if (k === 'f6') {
+        e.preventDefault();
+        toggle();
+        return;
+      }
+
+      // Ctrl+Shift+L
+      if (e.ctrlKey && e.shiftKey && k === 'l') {
+        e.preventDefault();
+        toggle();
+        return;
+      }
+    });
+  } catch (_) {}
+})();
+// ---- /Extra hotkeys ----
