@@ -1,2 +1,6 @@
 node_modules/
 dist/
+
+# IDE noise
+.idea/
+*.sublime-workspace
