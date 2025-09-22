@@ -1,109 +1,115 @@
-// main.js
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+// main.js — DEV-friendly (based on stable)
+// - Preserves preload/contextIsolation/sandbox settings
+// - Keeps 'export-html-pdf' IPC handler
+// - Restores a minimal menu so Linux/KDE accelerators work
+// - Auto-opens DevTools (detached)
+// - Adds Ctrl+I (no Fn) and Ctrl+Shift+I to toggle DevTools
+
+const { app, BrowserWindow, ipcMain, dialog, Menu, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-// Disable hardware acceleration to resolve rendering issues on some Linux systems.
-app.disableHardwareAcceleration();
+let win;
+
+function setDevMenu() {
+  const template = [
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { type: 'separator' },
+        { role: 'toggleDevTools', accelerator: 'Ctrl+Shift+I' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' }
+      ]
+    },
+    {
+      label: 'Help',
+      submenu: [
+        {
+          label: 'Open README',
+          click: async () => {
+            const readmePath = path.join(app.getAppPath(), 'README.md');
+            if (fs.existsSync(readmePath)) await shell.openPath(readmePath);
+          }
+        }
+      ]
+    }
+  ];
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
 
 function createWindow() {
-  const win = new BrowserWindow({
-    width: 1400,
-    height: 900,
+  win = new BrowserWindow({
+    width: 1280,
+    height: 860,
+    show: false,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-    },
+      preload: path.join(__dirname, 'src', 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: false,
+      devTools: true
+    }
   });
 
-  // Hide the menu bar
-  win.setMenu(null);
+  // Load your app (same as stable)
+  win.loadFile(path.join(__dirname, 'src', 'index.html'));
 
-  // Use path.join to correctly point to the 'src' folder
-  const indexPath = path.join(__dirname, 'src', 'index.html');
-  win.loadFile(indexPath);
+  // DEV aids
+  setDevMenu();
+  win.once('ready-to-show', () => {
+    try {
+      win.show();
+      win.webContents.openDevTools({ mode: 'detach' });
+    } catch {}
+  });
 
-  // win.webContents.openDevTools();
+  // Low-effort shortcuts: Ctrl+I (no Fn) and Ctrl+Shift+I both toggle DevTools
+  win.webContents.on('before-input-event', (event, input) => {
+    const key = (input.key || '').toLowerCase();
+    if (input.control && !input.shift && key === 'i') {
+      try { win.webContents.toggleDevTools(); } catch {}
+      event.preventDefault();
+    }
+    if (input.control && input.shift && key === 'i') {
+      try { win.webContents.toggleDevTools(); } catch {}
+      event.preventDefault();
+    }
+  });
+
+  win.on('closed', () => { win = null; });
 }
 
-app.whenReady().then(createWindow);
+// === PDF export handler preserved ===
+// Renderer: await ipcRenderer.invoke('export-html-pdf', optionalTargetPath)
+ipcMain.handle('export-html-pdf', async (_evt, targetPath = null) => {
+  const target = targetPath || (await dialog.showSaveDialog(win, {
+    title: 'Export as PDF',
+    defaultPath: 'export.pdf',
+    filters: [{ name: 'PDF', extensions: ['pdf'] }]
+  })).filePath;
+
+  if (!target) return { ok: false, reason: 'cancelled' };
+
+  const pdfData = await win.webContents.printToPDF({
+    printBackground: true,
+    landscape: false,
+    pageSize: 'A4'
+  });
+
+  fs.writeFileSync(target, pdfData);
+  return { ok: true, path: target };
+});
+
+app.whenReady().then(() => {
+  createWindow();
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  if (process.platform !== 'darwin') app.quit();
 });
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
-
-// ==========================
-// CODE FOR FILE EXPORT
-// ==========================
-ipcMain.on('save-html-dialog', async (event, data) => {
-  const window = BrowserWindow.fromWebContents(event.sender);
-  try {
-    const { htmlContent, defaultPath } = data;
-
-    // Replace colons in the default path to prevent issues on Windows.
-    const safeDefaultPath = defaultPath.replace(/:/g, '-');
-
-    const saveResult = await dialog.showSaveDialog(window, {
-      title: 'Save Card Review Results',
-      defaultPath: safeDefaultPath,
-      filters: [
-        { name: 'HTML Files', extensions: ['html'] },
-        { name: 'All Files', extensions: ['*'] },
-      ],
-    });
-
-    if (saveResult.canceled || !saveResult.filePath) {
-      event.sender.send('save-html-result', { success: false, canceled: true });
-      return;
-    }
-
-    await fs.promises.writeFile(saveResult.filePath, htmlContent, 'utf8');
-
-    const messageBoxResult = await dialog.showMessageBox(window, {
-      type: 'info',
-      buttons: ['Open File', 'OK'],
-      title: 'Save Successful',
-      message: 'File saved successfully!',
-      detail: `The file has been saved at: ${saveResult.filePath}`,
-    });
-
-    if (messageBoxResult.response === 0) {
-      shell.openPath(saveResult.filePath);
-    }
-
-    event.sender.send('save-html-result', {
-      success: true,
-      path: saveResult.filePath,
-      opened: messageBoxResult.response === 0,
-    });
-  } catch (err) {
-    event.sender.send('save-html-result', { success: false, error: err.message });
-  }
-});
-
-// ---- SMOKE HOOK (safe, additive) ----
-try {
-  const { app } = require('electron');
-  if (process.env.ELECTRON_SMOKE === '1') {
-    const done = () => {
-      console.log('[smoke] app ready');
-      app.quit();
-    };
-    if (app.isReady && app.isReady()) {
-      done();
-    } else if (app && app.once) {
-      app.once('ready', done);
-    }
-  }
-} catch (_) {
-  // ignore
-}
-// ---- END SMOKE HOOK ----
