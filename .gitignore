@@ -22,3 +22,7 @@ Thumbs.db
 
 # local backups
 *.bak
+
+# IDE noise
+*.sublime-workspace
+.idea/
