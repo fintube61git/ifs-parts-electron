@@ -12,6 +12,7 @@ let zoom = 1;
 // Node.js modules for the renderer process
 const fs = require('fs');
 const path = require('path');
+const { pathToFileURL } = require('url');
 const { ipcRenderer } = require('electron');
 
 // ==========================
@@ -72,7 +73,8 @@ function showEmptyState(message) {
 // AUTOMATIC FILE LOADING
 // ==========================
 async function loadFilesOnStartup() {
-    const baseDir = __dirname;
+    // assets live one level up from src/js (i.e., src/)
+    const baseDir = path.resolve(__dirname, '..');
     const imagesPath = path.join(baseDir, 'images');
     const questionsPath = path.join(baseDir, 'data', 'questions.json');
 
@@ -127,7 +129,7 @@ function showImage() {
     const canvas = document.getElementById('canvas');
     const imageFile = images[currentIndex];
 
-    canvas.src = `file://${imageFile.path}`;
+    canvas.src = pathToFileURL(imageFile.path).href;
     canvas.alt = `Review image: ${imageFile.name}`;
 
     updateCardCounter();
