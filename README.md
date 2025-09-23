@@ -44,3 +44,21 @@ Contribution Notes
 
 License
 ISC (default from package.json).
+
+📄 Documentation Pack Workflow
+
+All project documentation (BUILD.md, PROJECT_GUIDE.MD, TESTER_GUIDE.md, etc.) is also stored together in IFS_Docs_Pack.md at the repo root.
+
+Primary edit source: IFS_Docs_Pack.md
+
+Individual files: generated from the pack to keep GitHub navigation easy.
+
+To resync individual files after updating the pack:
+cd ~/Desktop/ifs-parts-electron
+scripts/sync-docs-from-pack.sh
+git add *.md
+git commit -m "docs: sync individual files from IFS_Docs_Pack.md"
+git push
+
+
+ℹ️ Backup files (.BAK) are ignored by .gitignore. If you need a manual copy, save it outside the repo.

@@ -1,6 +1,6 @@
 IFS Parts Electron – Documentation Pack
 
-README.md
+### README.md
 IFS Parts Electron
 An Electron-based desktop application for reviewing image-based “cards” with associated reflective questions.
 This tool supports Internal Family Systems (IFS) style part exploration in a structured digital format.
@@ -47,7 +47,7 @@ Contribution Notes
 License
 ISC (default from package.json).
 
-BUILD.md
+### BUILD.md
 Build & Packaging Guide
 This document describes how to set up, run, and package the IFS Parts Electron app.
 
@@ -96,7 +96,7 @@ o	Mark pre-release if experimental.
 ·	PDF export work is deferred (previous attempts unstable).
 ·	Baseline tags are important for cross-machine reproducibility.
 
-PROJECT_GUIDE.MD
+### PROJECT_GUIDE.MD
 Project Management and Testing Guide
 This is the central guide for managing the ifs-parts-electron project. It covers the entire lifecycle, from code development to tester communication.
 
@@ -132,7 +132,7 @@ Part 3: Documentation Management
 ·	Update guides/templates as needed
 ·	Commit changes with descriptive messages
 
-TESTER_GUIDE.md
+### TESTER_GUIDE.md
 Tester Guide
 Welcome to the IFS Parts Electron tester program. This guide explains how to install, run, and report feedback.
 
@@ -154,7 +154,7 @@ Feedback
 ·	Include OS, version, and steps to reproduce.
 Thank you for testing!
 
-INVITATION_TEMPLATE.md
+### INVITATION_TEMPLATE.md
 Tester Invitation Template
 Hello [Name],
 You are invited to participate in testing the IFS Parts Electron desktop app.
@@ -165,7 +165,7 @@ Steps:
 Thank you,
 — Project Owner
 
-UPDATE_NOTICE_TEMPLATE.md
+### UPDATE_NOTICE_TEMPLATE.md
 Tester Update Notice Template
 Hello Testers,
 A new release of IFS Parts Electron is available.
