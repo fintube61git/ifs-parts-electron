@@ -1,54 +1,34 @@
-PROJECT_GUIDE.md
-📘 Project Guide – IFS Parts Electron
-Overview
+Project Management Guide
+This is the central guide for managing the ifs-parts-electron project. It covers the entire lifecycle, from code development to tester communication.
 
-IFS Parts Electron is a cross-platform desktop app built with Electron.
-It presents card-like images with associated questions, allows annotations, and exports results.
+Part 1: Project Owner's Workflow
+1.1 Update Application Code
+Work locally, test via npm start.
+1.2 Commit & Push
+git add .
+git commit -m "Your descriptive message"
+git push origin main
 
-Structure
+1.3 Build
+npm run make
 
-src/ → app code (HTML, CSS, JS, preload, renderer)
+1.4 Release
+·	Draft new GitHub release
+·	Tag (e.g., v1.0.2)
+·	Attach build artifacts
+·	Mark pre-release if experimental
 
-src/images/ → card assets
+Part 2: Tester Management Workflow
+2.1 Onboarding a New Tester
+·	Send INVITATION_TEMPLATE.md text
+·	Add GitHub username as collaborator
+·	Confirm acceptance
+2.2 Notify Testers of Release
+·	Use UPDATE_NOTICE_TEMPLATE.md
+·	Fill in version + changelog
+·	Send to testers
 
-src/data/questions.json → card questions
-
-main.js → Electron entry point
-
-package.json → dependencies and scripts
-
-Branches
-
-main → default integration branch
-
-stable → locked, known-good builds
-
-bugfix/* → targeted fixes
-
-chores/* → editor or housekeeping changes
-
-Conventions
-
-Prefer feature branches; PR into main or stable.
-
-Commit messages follow <type>: <desc> (e.g., fix:, docs:, feat:).
-
-Tag stable baselines (v0.x.y) when tested.
-
-Dev Hints
-
-Run: npm start
-
-Package: npm run make
-
-Export HTML works reliably; PDF is WIP.
-
-Use Ctrl+I shortcut for DevTools on Linux.
-
-Next Steps
-
-Improve PDF export
-
-Expand question/answer formats
-
-Theme selector (dark/light) persisted
+Part 3: Documentation Management
+·	Keep all .md files in repo root
+·	Update guides/templates as needed
+·	Commit changes with descriptive messages
