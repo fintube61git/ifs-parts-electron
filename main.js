@@ -1,63 +1,99 @@
-// main.js
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+// main.js — DEV-friendly
+const { app, BrowserWindow, ipcMain, dialog, Menu, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-// Disable hardware acceleration to resolve rendering issues on some Linux systems.
-app.disableHardwareAcceleration();
+// If you had to disable HW accel on your machine, uncomment below:
+// app.disableHardwareAcceleration();
+
+let win;
+
+function setDevMenu() {
+  const template = [
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { type: 'separator' },
+        { role: 'toggleDevTools', accelerator: 'Ctrl+Shift+I' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' }
+      ]
+    },
+    {
+      label: 'Help',
+      submenu: [
+        {
+          label: 'Open README',
+          click: async () => {
+            const readmePath = path.join(app.getAppPath(), 'README.md');
+            if (fs.existsSync(readmePath)) await shell.openPath(readmePath);
+          }
+        }
+      ]
+    }
+  ];
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
 
 function createWindow() {
-  const win = new BrowserWindow({
-    width: 1400,
-    height: 900,
+  win = new BrowserWindow({
+    width: 1280,
+    height: 860,
+    show: false,
     webPreferences: {
+      // Your current app relies on Node in renderer:
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
+      // preload: path.join(__dirname, 'src', 'preload.js'), // (not used right now)
+      devTools: true,
+      sandbox: false
     }
   });
 
-  // Hide the menu bar
-  win.setMenu(null);
+  // Load the app UI
+  win.loadFile(path.join(__dirname, 'src', 'index.html'));
 
-  // Use path.join to correctly point to the 'src' folder
-  const indexPath = path.join(__dirname, 'src', 'index.html');
-  win.loadFile(indexPath);
+  // Minimal menu so accelerators work on Linux/KDE
+  setDevMenu();
 
-  // win.webContents.openDevTools();
+  // Auto-open DevTools once, detached (easier to see)
+  win.once('ready-to-show', () => {
+    try {
+      win.show();
+      win.webContents.openDevTools({ mode: 'detach' });
+    } catch {}
+  });
+
+  // Extra keyboard toggle: Ctrl+I (no Shift) also toggles DevTools
+  win.webContents.on('before-input-event', (event, input) => {
+    const key = (input.key || '').toLowerCase();
+    if (input.control && !input.shift && key === 'i') {
+      try { win.webContents.toggleDevTools(); } catch {}
+      event.preventDefault();
+    }
+  });
+
+  win.on('closed', () => { win = null; });
 }
 
-app.whenReady().then(createWindow);
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
-
-// ==========================
-// CODE FOR FILE EXPORT
-// ==========================
+// === PDF/HTML export handler (kept) ===
 ipcMain.on('save-html-dialog', async (event, data) => {
   const window = BrowserWindow.fromWebContents(event.sender);
   try {
     const { htmlContent, defaultPath } = data;
 
-    // Replace colons in the default path to prevent issues on Windows.
-    const safeDefaultPath = defaultPath.replace(/:/g, '-');
+    // Replace colons in default path (Windows)
+    const safeDefaultPath = (defaultPath || 'CardReview.html').replace(/:/g, '-');
 
     const saveResult = await dialog.showSaveDialog(window, {
       title: 'Save Card Review Results',
       defaultPath: safeDefaultPath,
-        filters: [
-          { name: 'HTML Files', extensions: ['html'] },
-          { name: 'All Files', extensions: ['*'] }
-        ]
+      filters: [
+        { name: 'HTML Files', extensions: ['html'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
     });
 
     if (saveResult.canceled || !saveResult.filePath) {
@@ -87,4 +123,15 @@ ipcMain.on('save-html-dialog', async (event, data) => {
   } catch (err) {
     event.sender.send('save-html-result', { success: false, error: err.message });
   }
+});
+
+app.whenReady().then(() => {
+  createWindow();
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
 });
