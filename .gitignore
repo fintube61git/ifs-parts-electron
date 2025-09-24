@@ -3,3 +3,6 @@ dist/
 
 # Local backups
 *.BAK*
+/out/
+/dist_upload/
+/node_modules/
