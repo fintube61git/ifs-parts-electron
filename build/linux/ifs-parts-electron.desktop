@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=IFS Parts
+GenericName=Therapeutic Parts Cards
+Comment=IFS Parts Application — Electron Desktop App
+Exec=/usr/bin/ifs-parts-electron %U
+Terminal=false
+Type=Application
+Icon=ifs-parts-electron
+Categories=Education;Utility;
+StartupWMClass=ifs-parts-electron

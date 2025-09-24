@@ -1,49 +1,57 @@
-BUILD.md
-Build & Packaging Guide
-This document describes how to set up, run, and package the IFS Parts Electron app.
+# BUILD GUIDE — IFS Parts Electron
 
-1. Prerequisites
-·	Node.js v20+ (LTS recommended)
-·	npm v10+
-·	Git
-·	Linux: build-essential and lib dependencies (varies by distro)
-·	macOS: Xcode CLI tools
-·	Windows: Visual Studio Build Tools (Desktop Development with C++)
+This document explains how to build, package, and test the IFS Parts Electron app across platforms.
 
-2. Setup
-# Clone repository
-git clone https://github.com/fintube61git/ifs-parts-electron.git
-cd ifs-parts-electron
-# Install dependencies
-npm install
-# Start in dev mode
-npm start
+---
 
+## Linux (Ubuntu/Debian) — Authoritative Path
 
-3. Running
-·	App auto-loads images from src/images/ and questions from src/data/questions.json.
-·	DevTools can be opened with Ctrl+I (enabled in dev baseline).
+### Local build (inside Ubuntu VM)
+1. Clone the repo:
+   git clone https://github.com/fintube61git/ifs-parts-electron.git
+   cd ifs-parts-electron
 
-4. Packaging (Electron Forge)
-# Linux AppImage (.AppImage)
-npm run make -- --platform=linux
-# macOS DMG (.dmg)
-npm run make -- --platform=darwin
-# Windows EXE (.exe via Squirrel)
-npm run make -- --platform=win32
+2. Install dependencies:
+   npm install
 
-Artifacts are generated in the out/ folder.
+3. Build package:
+   npm run make -- --platform=linux --arch=x64 --targets=@electron-forge/maker-deb
 
-5. Release Workflow
-	1.	Verify working branch (stable or feature/bugfix).
-	2.	Run npm run make for target platforms.
-	3.	Draft GitHub release:
-		o	Tag appropriately (vX.Y.Z or baseline-*).
-		o	Attach packaged artifacts.
-		o	Mark pre-release if experimental.
+4. Install locally:
+   sudo apt install ./out/make/deb/x64/*.deb
 
-6. Notes
-·	Export currently supports HTML only (baseline v0.2.0).
-·	PDF export work is deferred (previous attempts unstable).
-·	Baseline tags are important for cross-machine reproducibility.
+5. Run:
+   ifs-parts-electron
 
+---
+
+### CI/CD build (preferred)
+- On tag push (`vX.Y.Z`), GitHub Actions builds `.deb` automatically and publishes it as a release asset.
+- Workflow: `.github/workflows/release-linux.yml`
+- Output: `ifs-parts-electron_X.Y.Z_amd64.deb`
+
+---
+
+## Packaging Polish (planned for v1.0.20)
+
+- **Custom icons**: store under `/src/Icons/` (`app.png` at multiple sizes: 48, 64, 128, 256, 512)
+- **Desktop entry**: friendly name + icon will appear in Ubuntu app menu
+- **Release notes**: use `RELEASE_NOTES_TEMPLATE.md` for tester-friendly instructions
+
+---
+
+## Windows (next milestone)
+
+1. VM: Windows 11
+2. Install Node.js 20.x, VS Build Tools (C++)
+3. Run:
+   npm run make -- --platform=win32 --arch=x64
+4. Installer maker: NSIS (preferred)
+5. Output: `.exe` installer (to be added to GitHub Actions workflow later)
+
+---
+
+## Safe Tagging
+Always tag before risky changes:
+   git tag -a vX.Y.Z -m "description"
+   git push origin vX.Y.Z
