@@ -62,7 +62,7 @@ function createWindow() {
   win.once('ready-to-show', () => {
     try {
       win.show();
-      win.webContents.openDevTools({ mode: 'detach' });
+      // win.webContents.openDevTools({ mode: 'detach' });
     } catch {}
   });
 
