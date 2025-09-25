@@ -17,21 +17,22 @@ Build package:
 npm run make -- --platform=linux --arch=x64 --targets=@electron-forge/maker-deb
 
 Install locally:
-sudo apt install ./out/make/deb/x64/*.deb
+sudo apt install ./out/make/deb/x64/ifs-parts-electron_*_amd64.deb
 
 Run:
 ifs-parts-electron
+
 CI/CD build (preferred)
 
-On tag push (vX.Y.Z), GitHub Actions builds .deb automatically and publishes it as a release asset.
+On tag push (vX.Y.Z), GitHub Actions builds the .deb automatically and publishes it as a release asset.
 
 Workflow: .github/workflows/release-linux.yml
 
 Output: ifs-parts-electron_X.Y.Z_amd64.deb
 
-Packaging Polish (planned for v1.0.20)
+Packaging Polish
 
-Custom icons: /src/Icons/ (app.png at 48/64/128/256/512 px)
+Custom icons: /src/Icons/app.png at 48/64/128/256/512 px
 
 Desktop entry: friendly name + icon in Ubuntu app menu
 
@@ -39,19 +40,14 @@ Release notes: RELEASE_NOTES_TEMPLATE.md for testers
 
 Windows (next milestone)
 
-VM: Windows 11
+Set up Windows VM with Node.js 20 + Visual Studio Build Tools (Desktop C++ workload)
 
-Install Node.js 20.x, VS Build Tools (C++)
+Add @electron-forge/maker-squirrel (or NSIS maker)
 
-Run:
-npm run make -- --platform=win32 --arch=x64
+Build .exe via electron-forge make
 
-Installer maker: NSIS (preferred)
+Publish with GitHub Actions workflow
 
-Output: .exe installer (workflow later)
+Mac (future milestone)
 
-Safe Tagging
-
-Always tag before risky changes:
-git tag -a vX.Y.Z -m "description"
-git push origin vX.Y.Z
+Not yet targeted.
