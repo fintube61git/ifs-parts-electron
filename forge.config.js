@@ -14,9 +14,15 @@ module.exports = {
           productName: "IFS Parts",
           maintainer: "T. Dawson Woodrum",
           description: "IFS Parts Application — Electron Desktop App",
-          // Point to a concrete PNG. Debian tools will install it under hicolor.
-          // (We also checked in multi-size PNGs for future-proofing.)
-          icon: "build/icons/hicolor/512x512/apps/ifs-parts-electron.png",
+          // IMPORTANT: point to the DIRECTORY that contains the hicolor tree.
+          // We generated:
+          //   build/icons/hicolor/48x48/apps/ifs-parts-electron.png
+          //   build/icons/hicolor/64x64/apps/ifs-parts-electron.png
+          //   build/icons/hicolor/128x128/apps/ifs-parts-electron.png
+          //   build/icons/hicolor/256x256/apps/ifs-parts-electron.png
+          //   build/icons/hicolor/512x512/apps/ifs-parts-electron.png
+          // The Debian maker will install these into /usr/share/icons/hicolor/...
+          icon: "./build/icons",
           categories: ["Education", "Utility"]
         }
       }
