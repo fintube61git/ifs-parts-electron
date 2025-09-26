@@ -2,7 +2,8 @@ module.exports = {
   packagerConfig: {
     asar: true,
     executableName: "ifs-parts-electron",
-    icon: "src/Icons/app" // no extension, Electron adds .ico/.png
+    // Base icon for Electron packaging (omit extension)
+    icon: "src/Icons/app"
   },
   rebuildConfig: {},
   makers: [
@@ -13,7 +14,9 @@ module.exports = {
           productName: "IFS Parts",
           maintainer: "T. Dawson Woodrum",
           description: "IFS Parts Application — Electron Desktop App",
-          icon: "./src/Icons/app.png",
+          // Point to a concrete PNG. Debian tools will install it under hicolor.
+          // (We also checked in multi-size PNGs for future-proofing.)
+          icon: "build/icons/hicolor/512x512/apps/ifs-parts-electron.png",
           categories: ["Education", "Utility"]
         }
       }
