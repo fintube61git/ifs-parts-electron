@@ -1,6 +1,6 @@
 {
   "name": "ifs-parts-electron",
-  "version": "1.0.0",
+  "version": "1.0.22",
   "description": "IFS Parts Application - Electron Desktop App",
   "main": "main.js",
   "scripts": {
